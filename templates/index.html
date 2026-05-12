@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home - Expense Tracker{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+    <h1>Привіт, {{ user.email }}!</h1>
+    <p class="lead">Тут буде твій dashboard з транзакціями.</p>
+    <!-- TODO: посилання на /transactions/ коли зробимо finances app -->
+{% else %}
+    <div class="text-center py-5">
+        <h1 class="display-4">Expense Tracker</h1>
+        <p class="lead">Веб-додаток для аналізу особистих витрат.</p>
+        <p>Реєструйся, додавай витрати в будь-якій валюті, бачи статистику в гривнях.</p>
+        <a href="{% url 'signup' %}" class="btn btn-primary btn-lg mt-3">Почати</a>
+    </div>
+{% endif %}
+{% endblock %}
