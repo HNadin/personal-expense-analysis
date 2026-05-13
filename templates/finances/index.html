@@ -1,0 +1,7 @@
+{% if user.is_authenticated %}
+    <h1>Привіт, {{ user.email }}!</h1>
+    <p class="lead">Керуй своїми витратами в одному місці.</p>
+    <a href="{% url 'table_list' %}" class="btn btn-primary btn-lg mt-3">Мої таблиці →</a>
+{% else %}
+    ...
+{% endif %}

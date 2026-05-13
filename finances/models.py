@@ -1,5 +1,7 @@
 from django.conf import settings
 from django.db import models
+from decimal import Decimal
+from django.core.validators import MinValueValidator
 
 
 class Category(models.Model):
@@ -39,7 +41,16 @@ class Transaction(models.Model):
         EUR = "EUR", "Євро"
 
     title = models.CharField(max_length=200, blank=True)
-    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        validators=[
+            MinValueValidator(
+                Decimal("0.01"),
+                message="Сума має бути більшою за нуль.",
+            )
+        ],
+    )
     currency = models.CharField(max_length=3, choices=Currency.choices, default=Currency.UAH)
     date = models.DateField()
     table = models.ForeignKey(
@@ -59,3 +70,15 @@ class Transaction(models.Model):
 
     def __str__(self):
         return f"{self.title or 'Transaction'} — {self.amount} {self.currency}"
+
+    _FALLBACK_RATES_TO_UAH = {
+        "UAH": 1,
+        "USD": 41,
+        "EUR": 44,
+    }
+
+    @property
+    def amount_in_uah(self):
+        """Повертає суму, конвертовану в UAH. Тимчасово на фіксованих курсах."""
+        rate = self._FALLBACK_RATES_TO_UAH.get(self.currency, 1)
+        return self.amount * rate
