@@ -1,5 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models.functions import Lower
+from decimal import Decimal
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import (
@@ -98,6 +99,8 @@ class TransactionListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         from .models import Category
+        from .services.exchange import convert_to_uah, ExchangeRateError
+
         ctx = super().get_context_data(**kwargs)
         ctx["table"] = self.table
         ctx["categories"] = Category.objects.all()
@@ -108,6 +111,31 @@ class TransactionListView(LoginRequiredMixin, ListView):
             "date_to": self.request.GET.get("date_to", ""),
             "sort": self.request.GET.get("sort", ""),
         }
+
+        # Рахуємо тотали — за всіма транзакціями таблиці (НЕ враховуємо фільтри,
+        # це баланс таблиці в цілому). Якщо хочеш по фільтрах — використай self.object_list.
+        all_transactions = self.table.transactions.all()
+        totals_by_currency = {}
+        for t in all_transactions:
+            totals_by_currency.setdefault(t.currency, Decimal("0"))
+            totals_by_currency[t.currency] += t.amount
+        ctx["totals_by_currency"] = totals_by_currency
+
+        # Загальна сума в UAH (якщо юзер натиснув "Показати в UAH")
+        show_in_uah = self.request.GET.get("show_in_uah") == "1"
+        ctx["show_in_uah"] = show_in_uah
+        if show_in_uah:
+            try:
+                total_uah = sum(
+                    (convert_to_uah(amount, currency) for currency, amount in totals_by_currency.items()),
+                    Decimal("0"),
+                )
+                ctx["total_in_uah"] = total_uah
+                ctx["uah_error"] = None
+            except ExchangeRateError as e:
+                ctx["total_in_uah"] = None
+                ctx["uah_error"] = str(e)
+
         return ctx
 
 

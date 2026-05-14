@@ -71,14 +71,17 @@ class Transaction(models.Model):
     def __str__(self):
         return f"{self.title or 'Transaction'} — {self.amount} {self.currency}"
 
-    _FALLBACK_RATES_TO_UAH = {
-        "UAH": 1,
-        "USD": 41,
-        "EUR": 44,
-    }
-
     @property
     def amount_in_uah(self):
-        """Повертає суму, конвертовану в UAH. Тимчасово на фіксованих курсах."""
-        rate = self._FALLBACK_RATES_TO_UAH.get(self.currency, 1)
-        return self.amount * rate
+        """
+        Сума, конвертована в UAH за актуальним курсом OpenExchangeRates.
+        На випадок проблем з API повертає суму як є з прапором про fallback.
+        """
+        from .services.exchange import convert_to_uah, ExchangeRateError
+
+        try:
+            return convert_to_uah(self.amount, self.currency)
+        except ExchangeRateError:
+            # Якщо API недоступний — повертаємо суму "як є"
+            # Це не ідеально, але краще ніж 500-та помилка на сторінці.
+            return self.amount if self.currency == "UAH" else None

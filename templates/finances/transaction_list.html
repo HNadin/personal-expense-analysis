@@ -3,120 +3,171 @@
 {% block title %}Транзакції — {{ table.name }}{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-        <a href="{% url 'table_list' %}" class="text-muted small">← До таблиць</a>
-        <h2 class="mb-0">{{ table.name }}</h2>
-    </div>
-    <a href="{% url 'transaction_create' table_id=table.pk %}" class="btn btn-primary">+ Нова транзакція</a>
-</div>
-
-<!-- Фільтри -->
-<form method="get" class="card card-body mb-4 bg-light">
-    <div class="row g-2 align-items-end">
-        <div class="col-md-3">
-            <label class="form-label small mb-1 text-muted">Пошук</label>
-            <input type="text" name="search" class="form-control form-control-sm"
-                   placeholder="За назвою" value="{{ filters.search }}">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <a href="{% url 'table_list' %}" class="text-muted small">← До таблиць</a>
+            <h2 class="mb-0">{{ table.name }}</h2>
         </div>
-        <div class="col-md-2">
-            <label class="form-label small mb-1 text-muted">Категорія</label>
-            <select name="category" class="form-select form-select-sm">
-                <option value="">Усі</option>
-                {% for cat in categories %}
-                    <option value="{{ cat.id }}" {% if filters.category == cat.id|stringformat:"s" %}selected{% endif %}>
-                        {{ cat.name }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="col-md-2">
-            <label class="form-label small mb-1 text-muted">Дата від</label>
-            <input type="date" name="date_from" class="form-control form-control-sm" value="{{ filters.date_from }}">
-        </div>
-        <div class="col-md-2">
-            <label class="form-label small mb-1 text-muted">Дата до</label>
-            <input type="date" name="date_to" class="form-control form-control-sm" value="{{ filters.date_to }}">
-        </div>
-        <div class="col-md-2">
-            <label class="form-label small mb-1 text-muted">Сортувати</label>
-            <select name="sort" class="form-select form-select-sm">
-                <option value="">За датою ↓</option>
-                <option value="date" {% if filters.sort == "date" %}selected{% endif %}>За датою ↑</option>
-                <option value="-amount" {% if filters.sort == "-amount" %}selected{% endif %}>Сума ↓</option>
-                <option value="amount" {% if filters.sort == "amount" %}selected{% endif %}>Сума ↑</option>
-            </select>
-        </div>
-        <div class="col-md-1">
-            <button type="submit" class="btn btn-sm btn-primary w-100">OK</button>
-        </div>
-    </div>
-    {% if filters.search or filters.category or filters.date_from or filters.date_to or filters.sort %}
-        <div class="mt-2">
-            <a href="{% url 'transaction_list' table_id=table.pk %}" class="btn btn-sm btn-link text-muted p-0">
-                Скинути фільтри
-            </a>
-        </div>
-    {% endif %}
-</form>
-
-<!-- Список -->
-{% if transactions %}
-<table class="table table-hover">
-    <thead>
-        <tr>
-            <th>Дата</th>
-            <th>Назва</th>
-            <th>Категорії</th>
-            <th class="text-end">Сума</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for t in transactions %}
-        <tr>
-            <td class="text-muted">{{ t.date|date:"d.m.Y" }}</td>
-            <td>{{ t.title|default:"—" }}</td>
-            <td>
-                {% for cat in t.categories.all %}
-                    <span class="badge bg-secondary">{{ cat.name }}</span>
-                {% endfor %}
-            </td>
-            <td class="text-end fw-bold">{{ t.amount }} {{ t.currency }}</td>
-            <td class="text-end">
-                <a href="{% url 'transaction_update' pk=t.pk %}" class="btn btn-sm btn-outline-secondary">✎</a>
-                <a href="{% url 'transaction_delete' pk=t.pk %}" class="btn btn-sm btn-outline-danger">×</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-<!-- Пагінація -->
-{% if is_paginated %}
-<nav>
-    <ul class="pagination">
-        {% if page_obj.has_previous %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">←</a>
-            </li>
-        {% endif %}
-        <li class="page-item active">
-            <span class="page-link">{{ page_obj.number }} з {{ page_obj.paginator.num_pages }}</span>
-        </li>
-        {% if page_obj.has_next %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.next_page_number }}">→</a>
-            </li>
-        {% endif %}
-    </ul>
-</nav>
-{% endif %}
-
-{% else %}
-    <div class="text-center py-5 text-muted">
-        <p>Транзакцій ще нема. Додай першу!</p>
         <a href="{% url 'transaction_create' table_id=table.pk %}" class="btn btn-primary">+ Нова транзакція</a>
     </div>
-{% endif %}
+
+    <!-- Фільтри -->
+    <form method="get" class="card card-body mb-4 bg-light">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label small mb-1 text-muted">Пошук</label>
+                <input type="text" name="search" class="form-control form-control-sm"
+                       placeholder="За назвою" value="{{ filters.search }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small mb-1 text-muted">Категорія</label>
+                <select name="category" class="form-select form-select-sm">
+                    <option value="">Усі</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat.id }}"
+                                {% if filters.category == cat.id|stringformat:"s" %}selected{% endif %}>
+                            {{ cat.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small mb-1 text-muted">Дата від</label>
+                <input type="date" name="date_from" class="form-control form-control-sm"
+                       value="{{ filters.date_from }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small mb-1 text-muted">Дата до</label>
+                <input type="date" name="date_to" class="form-control form-control-sm" value="{{ filters.date_to }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small mb-1 text-muted">Сортувати</label>
+                <select name="sort" class="form-select form-select-sm">
+                    <option value="">За датою ↓</option>
+                    <option value="date" {% if filters.sort == "date" %}selected{% endif %}>За датою ↑</option>
+                    <option value="-amount" {% if filters.sort == "-amount" %}selected{% endif %}>Сума ↓</option>
+                    <option value="amount" {% if filters.sort == "amount" %}selected{% endif %}>Сума ↑</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-sm btn-primary w-100">OK</button>
+            </div>
+        </div>
+        {% if filters.search or filters.category or filters.date_from or filters.date_to or filters.sort %}
+            <div class="mt-2">
+                <a href="{% url 'transaction_list' table_id=table.pk %}" class="btn btn-sm btn-link text-muted p-0">
+                    Скинути фільтри
+                </a>
+            </div>
+        {% endif %}
+    </form>
+
+    <!-- Список -->
+    {% if transactions %}
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th>Дата</th>
+                <th>Назва</th>
+                <th>Категорії</th>
+                <th class="text-end">Сума</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for t in transactions %}
+                <tr>
+                    <td class="text-muted">{{ t.date|date:"d.m.Y" }}</td>
+                    <td>{{ t.title|default:"—" }}</td>
+                    <td>
+                        {% for cat in t.categories.all %}
+                            <span class="badge bg-secondary">{{ cat.name }}</span>
+                        {% endfor %}
+                    </td>
+                    <td class="text-end">
+                        <div class="fw-bold">{{ t.amount }} {{ t.currency }}</div>
+                        {% if show_in_uah and t.currency != "UAH" %}
+                            {% if t.amount_in_uah %}
+                                <div class="small text-muted">≈ {{ t.amount_in_uah }} UAH</div>
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        <a href="{% url 'transaction_update' pk=t.pk %}" class="btn btn-sm btn-outline-secondary">✎</a>
+                        <a href="{% url 'transaction_delete' pk=t.pk %}" class="btn btn-sm btn-outline-danger">×</a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        {# після </table> #}
+
+        <!-- Тотали -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="card-title">Підсумок таблиці</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-2 text-muted small">За валютами:</p>
+                        {% for currency, total in totals_by_currency.items %}
+                            <div class="d-flex justify-content-between border-bottom py-1">
+                                <span>{{ currency }}</span>
+                                <strong>{{ total }}</strong>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6 border-start">
+                        {% if show_in_uah %}
+                            {% if uah_error %}
+                                <div class="alert alert-warning small mb-0">
+                                    ⚠️ {{ uah_error }}
+                                </div>
+                            {% else %}
+                                <p class="mb-2 text-muted small">Усе в UAH:</p>
+                                <div class="display-6">{{ total_in_uah }} UAH</div>
+                                <a href="?{% if filters.search %}search={{ filters.search }}&{% endif %}{% if filters.category %}category={{ filters.category }}&{% endif %}{% if filters.date_from %}date_from={{ filters.date_from }}&{% endif %}{% if filters.date_to %}date_to={{ filters.date_to }}&{% endif %}{% if filters.sort %}sort={{ filters.sort }}{% endif %}"
+                                   class="btn btn-sm btn-outline-secondary mt-2">
+                                    ← Показати за валютами
+                                </a>
+                            {% endif %}
+                        {% else %}
+                            <p class="mb-2 text-muted small">Хочеш бачити загальну суму в гривнях?</p>
+                            <a href="?show_in_uah=1{% if filters.search %}&search={{ filters.search }}{% endif %}{% if filters.category %}&category={{ filters.category }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}{% if filters.sort %}&sort={{ filters.sort }}{% endif %}"
+                               class="btn btn-primary">
+                                💱 Показати все в UAH
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Пагінація -->
+        {% if is_paginated %}
+            <nav>
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">←</a>
+                        </li>
+                    {% endif %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ page_obj.number }} з {{ page_obj.paginator.num_pages }}</span>
+                    </li>
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">→</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+
+    {% else %}
+        <div class="text-center py-5 text-muted">
+            <p>Транзакцій ще нема. Додай першу!</p>
+            <a href="{% url 'transaction_create' table_id=table.pk %}" class="btn btn-primary">+ Нова транзакція</a>
+        </div>
+    {% endif %}
 {% endblock %}
