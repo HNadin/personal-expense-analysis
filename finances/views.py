@@ -17,7 +17,6 @@ from .models import Table, Transaction
 
 
 # === Table CRUD ===
-
 class TableListView(OwnerQuerysetMixin, ListView):
     model = Table
     template_name = "finances/table_list.html"
@@ -91,7 +90,6 @@ class TransactionListView(LoginRequiredMixin, ListView):
 
         if sort in ("amount", "-amount"):
             # Сортування за сумою — у Python, бо треба врахувати валюту через amount_in_uah.
-            # Це OK для невеликих обсягів; на тисячах транзакцій треба буде anотейшн на SQL.
             qs = list(qs.distinct())
             qs.sort(key=lambda t: t.amount_in_uah, reverse=(sort == "-amount"))
             return qs
@@ -113,8 +111,7 @@ class TransactionListView(LoginRequiredMixin, ListView):
             "sort": self.request.GET.get("sort", ""),
         }
 
-        # Рахуємо тотали — за всіма транзакціями таблиці (НЕ враховуємо фільтри,
-        # це баланс таблиці в цілому). Якщо хочеш по фільтрах — використай self.object_list.
+        # Рахуємо тотали — за всіма транзакціями таблиці (НЕ враховуємо фільтри)
         all_transactions = self.table.transactions.all()
         totals_by_currency = {}
         for t in all_transactions:

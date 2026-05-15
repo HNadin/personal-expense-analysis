@@ -5,15 +5,55 @@
 
 {% block content %}
 {% if user.is_authenticated %}
-    <h1>Привіт, {{ user.email }}!</h1>
-    <p class="lead">Тут буде твій dashboard з транзакціями.</p>
-    <!-- TODO: посилання на /transactions/ коли зробимо finances app -->
+    <div class="text-center py-5">
+        <h1>Привіт, {{ user.email }}!</h1>
+        <p class="lead">Керуй своїми витратами в одному місці.</p>
+        <div class="mt-4">
+            <a href="{% url 'table_list' %}" class="btn btn-primary btn-lg me-2">
+                📋 Мої таблиці
+            </a>
+        </div>
+    </div>
 {% else %}
     <div class="text-center py-5">
         <h1 class="display-4">Expense Tracker</h1>
         <p class="lead">Веб-додаток для аналізу особистих витрат.</p>
         <p>Реєструйся, додавай витрати в будь-якій валюті, бачи статистику в гривнях.</p>
-        <a href="{% url 'signup' %}" class="btn btn-primary btn-lg mt-3">Почати</a>
+
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-3">
+                <div class="card border-0 bg-light h-100">
+                    <div class="card-body">
+                        <div class="display-6">💰</div>
+                        <h5>Різні валюти</h5>
+                        <p class="small text-muted mb-0">UAH, USD, EUR з автоматичною конвертацією</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 bg-light h-100">
+                    <div class="card-body">
+                        <div class="display-6">📊</div>
+                        <h5>Аналітика</h5>
+                        <p class="small text-muted mb-0">Чарт по категоріях, тотали в гривнях</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 bg-light h-100">
+                    <div class="card-body">
+                        <div class="display-6">🔒</div>
+                        <h5>Безпечно</h5>
+                        <p class="small text-muted mb-0">Твої дані бачиш тільки ти</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <a href="{% url 'signup' %}" class="btn btn-primary btn-lg mt-5">Почати</a>
+        <p class="mt-3 small text-muted">
+            Вже є акаунт? <a href="{% url 'login' %}">Увійти</a>
+        </p>
     </div>
 {% endif %}
 {% endblock %}

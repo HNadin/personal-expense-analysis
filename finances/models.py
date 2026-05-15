@@ -83,6 +83,4 @@ class Transaction(models.Model):
         try:
             return convert_to_uah(self.amount, self.currency)
         except ExchangeRateError:
-            # Якщо API недоступний — повертаємо суму "як є"
-            # Це не ідеально, але краще ніж 500-та помилка на сторінці.
             return self.amount if self.currency == "UAH" else None

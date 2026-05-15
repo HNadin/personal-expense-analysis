@@ -10,7 +10,7 @@ urlpatterns = [
     path("tables/<int:pk>/delete/", views.TableDeleteView.as_view(), name="table_delete"),
     path("tables/<int:table_id>/analytics/", views.TableAnalyticsView.as_view(), name="table_analytics"),
 
-    # Transactions (nested під table)
+    # Transactions
     path("tables/<int:table_id>/transactions/", views.TransactionListView.as_view(), name="transaction_list"),
     path("tables/<int:table_id>/transactions/new/", views.TransactionCreateView.as_view(), name="transaction_create"),
     path("transactions/<int:pk>/edit/", views.TransactionUpdateView.as_view(), name="transaction_update"),
