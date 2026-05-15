@@ -1,5 +1,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models.functions import Lower
+from django.shortcuts import get_object_or_404
+from django.views.generic import TemplateView
 from decimal import Decimal
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
@@ -183,3 +185,65 @@ class TransactionDeleteView(TableOwnerQuerysetMixin, DeleteView):
 
     def get_success_url(self):
         return reverse_lazy("transaction_list", kwargs={"table_id": self.object.table.pk})
+
+
+class TableAnalyticsView(LoginRequiredMixin, TemplateView):
+    template_name = "finances/table_analytics.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.table = get_object_or_404(
+            Table, pk=self.kwargs["table_id"], owner=request.user
+        )
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        from .services.exchange import ExchangeRateError, convert_to_uah
+
+        ctx = super().get_context_data(**kwargs)
+        ctx["table"] = self.table
+
+        transactions = self.table.transactions.prefetch_related("categories")
+        ctx["transaction_count"] = transactions.count()
+
+        try:
+            ctx["chart_data"] = self._build_categories_chart_data(transactions)
+            ctx["total_in_uah"] = sum(
+                (convert_to_uah(t.amount, t.currency) for t in transactions),
+                Decimal("0"),
+            )
+            ctx["api_error"] = None
+        except ExchangeRateError as e:
+            ctx["chart_data"] = None
+            ctx["total_in_uah"] = None
+            ctx["api_error"] = str(e)
+
+        return ctx
+
+    def _build_categories_chart_data(self, transactions):
+        """
+        Рахує суми витрат за кожною категорією, в UAH.
+        Транзакції з кількома категоріями діляться пропорційно.
+        Транзакції без категорій ідуть у "Без категорії".
+        """
+        from collections import defaultdict
+        from .services.exchange import convert_to_uah
+
+        totals = defaultdict(lambda: Decimal("0"))
+
+        for t in transactions:
+            amount_uah = convert_to_uah(t.amount, t.currency)
+            cats = list(t.categories.all())
+
+            if not cats:
+                totals["Без категорії"] += amount_uah
+            else:
+                share = amount_uah / len(cats)
+                for cat in cats:
+                    totals[cat.name] += share
+
+        sorted_items = sorted(totals.items(), key=lambda x: x[1], reverse=True)
+
+        return {
+            "labels": [name for name, _ in sorted_items],
+            "values": [float(amount.quantize(Decimal("0.01"))) for _, amount in sorted_items],
+        }

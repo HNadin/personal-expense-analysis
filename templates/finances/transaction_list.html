@@ -8,7 +8,10 @@
             <a href="{% url 'table_list' %}" class="text-muted small">← До таблиць</a>
             <h2 class="mb-0">{{ table.name }}</h2>
         </div>
-        <a href="{% url 'transaction_create' table_id=table.pk %}" class="btn btn-primary">+ Нова транзакція</a>
+        <div>
+            <a href="{% url 'table_analytics' table_id=table.pk %}" class="btn btn-outline-success me-2">📊 Аналітика</a>
+            <a href="{% url 'transaction_create' table_id=table.pk %}" class="btn btn-primary">+ Нова транзакція</a>
+        </div>
     </div>
 
     <!-- Фільтри -->
