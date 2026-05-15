@@ -7,9 +7,10 @@
 import logging
 from decimal import Decimal
 
-import requests
 from django.conf import settings
 from django.core.cache import cache
+
+import requests
 
 logger = logging.getLogger(__name__)
 

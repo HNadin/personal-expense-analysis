@@ -1,0 +1,7 @@
+[tool.isort]
+profile = "black"
+line_length = 120
+skip = [".venv", "venv", "migrations"]
+known_django = ["django"]
+known_first_party = ["users", "finances", "personal_expense_analysis"]
+sections = ["FUTURE", "STDLIB", "DJANGO", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]

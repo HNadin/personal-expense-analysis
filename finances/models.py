@@ -1,7 +1,8 @@
-from django.conf import settings
-from django.db import models
 from decimal import Decimal
+
+from django.conf import settings
 from django.core.validators import MinValueValidator
+from django.db import models
 
 
 class Category(models.Model):
@@ -77,7 +78,7 @@ class Transaction(models.Model):
         Сума, конвертована в UAH за актуальним курсом OpenExchangeRates.
         На випадок проблем з API повертає суму як є з прапором про fallback.
         """
-        from .services.exchange import convert_to_uah, ExchangeRateError
+        from .services.exchange import ExchangeRateError, convert_to_uah
 
         try:
             return convert_to_uah(self.amount, self.currency)

@@ -1,21 +1,20 @@
+from decimal import Decimal
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models.functions import Lower
-from django.shortcuts import get_object_or_404
-from django.views.generic import TemplateView
-from decimal import Decimal
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import (
     CreateView,
     DeleteView,
     ListView,
+    TemplateView,
     UpdateView,
 )
 
 from .forms import TableForm, TransactionForm
 from .mixins import OwnerQuerysetMixin, TableOwnerQuerysetMixin
 from .models import Table, Transaction
-
 
 # === Table CRUD ===
 
@@ -101,7 +100,7 @@ class TransactionListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         from .models import Category
-        from .services.exchange import convert_to_uah, ExchangeRateError
+        from .services.exchange import ExchangeRateError, convert_to_uah
 
         ctx = super().get_context_data(**kwargs)
         ctx["table"] = self.table
@@ -226,6 +225,7 @@ class TableAnalyticsView(LoginRequiredMixin, TemplateView):
         Транзакції без категорій ідуть у "Без категорії".
         """
         from collections import defaultdict
+
         from .services.exchange import convert_to_uah
 
         totals = defaultdict(lambda: Decimal("0"))
