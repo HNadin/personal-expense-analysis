@@ -40,3 +40,5 @@ ENV/
 
 # Ruff
 .ruff_cache/
+
+staticfiles/
