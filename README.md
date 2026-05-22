@@ -4,6 +4,10 @@ A web application for personal expense analysis. Users can register, manage fina
 
 This project was developed as part of pre-graduation practice.
 
+## Live Demo
+
+🌐 [expense-tracker-practice-ef2b7b199a2d.herokuapp.com](https://expense-tracker-practice-ef2b7b199a2d.herokuapp.com/)
+
 ## Features
 
 - Registration and authentication via email (without using a username field)
@@ -103,5 +107,3 @@ isort .
 Configuration:
 - `.flake8` — `max-line-length=120`, migrations and venv are excluded
 - `pyproject.toml` — `profile=black`, `line_length=120`, custom import sections (stdlib → django → third-party → first-party)
-
-## Screenshots
