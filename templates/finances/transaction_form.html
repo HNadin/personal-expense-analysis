@@ -1,26 +1,49 @@
 {% extends 'base.html' %}
 
-{% block title %}{% if object %}Редагувати{% else %}Нова{% endif %} транзакція{% endblock %}
+{% block title %}{% if object %}Редагувати транзакцію{% else %}Нова транзакція{% endif %} — ExpenseTrack{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <a href="{% url 'transaction_list' table_id=table.pk %}" class="text-muted small">← До списку</a>
-        <h2 class="mb-4">{% if object %}Редагувати транзакцію{% else %}Нова транзакція{% endif %}</h2>
-        <form method="post" novalidate>
-            {% csrf_token %}
-            {% for field in form %}
-                <div class="mb-3">
-                    <label class="form-label">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.errors %}
-                        <div class="text-danger small mt-1">{{ field.errors|join:", " }}</div>
-                    {% endif %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            <a href="{% url 'transaction_list' table_id=table.pk %}" class="breadcrumb-link mb-3 d-inline-flex">
+                <i class="bi bi-arrow-left"></i>
+                До транзакцій
+            </a>
+            <div class="form-card">
+                <div class="form-card-header">
+                    <h2>{% if object %}Редагувати транзакцію{% else %}Нова транзакція{% endif %}</h2>
+                    <p class="text-muted small mb-0 mt-1">Таблиця: {{ table.name }}</p>
                 </div>
-            {% endfor %}
-            <button type="submit" class="btn btn-primary">Зберегти</button>
-            <a href="{% url 'transaction_list' table_id=table.pk %}" class="btn btn-outline-secondary">Скасувати</a>
-        </form>
+                <div class="form-card-body">
+                    <form method="post" novalidate id="form-content">
+                        {% csrf_token %}
+                        {% for field in form %}
+                            <div class="mb-4">
+                                <label class="form-label">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.errors %}
+                                    <div class="text-danger small mt-1">
+                                        <i class="bi bi-exclamation-circle me-1"></i>
+                                        {{ field.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                                {% if field.help_text %}
+                                    <div class="text-muted small mt-1">{{ field.help_text }}</div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </form>
+                </div>
+                <div class="form-card-footer">
+                    <button type="submit" form="form-content" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-1"></i>
+                        Зберегти
+                    </button>
+                    <a href="{% url 'transaction_list' table_id=table.pk %}" class="btn btn-outline-secondary">Скасувати</a>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

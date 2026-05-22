@@ -1,75 +1,89 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Аналітика — {{ table.name }}{% endblock %}
+{% block title %}Аналітика — {{ table.name }} — ExpenseTrack{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-        <a href="{% url 'transaction_list' table_id=table.pk %}" class="text-muted small">← До транзакцій</a>
-        <h2 class="mb-0">📊 Аналітика: {{ table.name }}</h2>
-    </div>
-</div>
-
-{% if transaction_count == 0 %}
-    <div class="alert alert-info">
-        У цій таблиці ще нема транзакцій. <a href="{% url 'transaction_create' table_id=table.pk %}">Додай першу</a>, щоб побачити аналітику.
-    </div>
-{% elif api_error %}
-    <div class="alert alert-warning">
-        ⚠️ Не вдалося отримати курси валют для побудови аналітики.
-        <details class="mt-2">
-            <summary class="small">Деталі помилки</summary>
-            <code class="small">{{ api_error }}</code>
-        </details>
-    </div>
-{% else %}
-
-    <!-- Сумарна картка -->
-    <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                    <p class="text-muted small mb-1">Всього транзакцій</p>
-                    <div class="display-5">{{ transaction_count }}</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                    <p class="text-muted small mb-1">Загальна сума</p>
-                    <div class="display-5">{{ total_in_uah }}</div>
-                    <small class="text-muted">UAH</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card text-center h-100" style="border-left: 5px solid {{ table.color }};">
-                <div class="card-body">
-                    <p class="text-muted small mb-1">Категорій у топі</p>
-                    <div class="display-5">{{ chart_data.labels|length }}</div>
-                </div>
-            </div>
+<div class="container py-4">
+    <!-- Header -->
+    <div class="page-header">
+        <div>
+            <a href="{% url 'transaction_list' table_id=table.pk %}" class="breadcrumb-link">
+                <i class="bi bi-arrow-left"></i>
+                До транзакцій
+            </a>
+            <h2>Аналітика</h2>
+            <p class="text-muted small mb-0">{{ table.name }}</p>
         </div>
     </div>
 
-    <!-- Чарт -->
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title mb-3">Розподіл витрат за категоріями</h5>
-            <div style="position: relative; height: 450px;">
+    {% if transaction_count == 0 %}
+        <div class="card">
+            <div class="card-body">
+                <div class="empty-state">
+                    <span class="empty-state-icon">📊</span>
+                    <h5>Немає даних для аналітики</h5>
+                    <p>Додай транзакції в цю таблицю, щоб побачити статистику</p>
+                    <a href="{% url 'transaction_create' table_id=table.pk %}" class="btn btn-primary">
+                        <i class="bi bi-plus-lg me-1"></i>
+                        Додати транзакцію
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    {% elif api_error %}
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            <strong>Не вдалося отримати курси валют</strong>
+            <details class="mt-2">
+                <summary class="small" style="cursor:pointer;">Деталі помилки</summary>
+                <code class="small d-block mt-1">{{ api_error }}</code>
+            </details>
+        </div>
+
+    {% else %}
+        <!-- Stats row -->
+        <div class="row g-3 mb-2">
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-card-icon" style="background:#ede9fe;">📋</div>
+                    <div class="stat-card-value text-gradient">{{ transaction_count }}</div>
+                    <div class="stat-card-label">транзакцій</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-card-icon" style="background:#d1fae5;">💰</div>
+                    <div class="stat-card-value text-gradient">{{ total_in_uah }}</div>
+                    <div class="stat-card-label">UAH загалом</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card" style="border-top: 4px solid {{ table.color }};">
+                    <div class="stat-card-icon" style="background:#fef3c7;">🏷️</div>
+                    <div class="stat-card-value text-gradient">{{ chart_data.labels|length }}</div>
+                    <div class="stat-card-label">категорій</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="chart-card">
+            <h5 class="fw-bold mb-1">Розподіл витрат за категоріями</h5>
+            <p class="text-muted small mb-4">Усі суми сконвертовані в UAH за актуальним курсом</p>
+            <div style="position:relative; height:440px; max-width:640px; margin:0 auto;">
                 <canvas id="categoriesChart"></canvas>
             </div>
-            <p class="text-muted small mb-0 mt-3">
-                ℹ️ Усі суми сконвертовані в UAH за актуальним курсом. Якщо транзакція має кілька категорій — її сума ділиться між ними порівну.
+            <p class="text-muted small mb-0 mt-4">
+                <i class="bi bi-info-circle me-1"></i>
+                Якщо транзакція має кілька категорій — її сума ділиться між ними порівну.
             </p>
         </div>
-    </div>
 
-    {{ chart_data|json_script:"chart-data" }}
-{% endif %}
-
+        {{ chart_data|json_script:"chart-data" }}
+    {% endif %}
+</div>
 {% endblock %}
 
 {% block extra_js %}

@@ -1,47 +1,71 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Мої таблиці{% endblock %}
+{% block title %}Мої таблиці — ExpenseTrack{% endblock %}
 
 {% block content %}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Мої таблиці</h2>
-        <a href="{% url 'table_create' %}" class="btn btn-primary">+ Нова таблиця</a>
+<div class="container py-4">
+    <div class="page-header">
+        <div>
+            <h2>Мої таблиці</h2>
+            <p class="text-muted mb-0" style="font-size:0.9375rem;">Організовуй витрати в окремі таблиці</p>
+        </div>
+        <a href="{% url 'table_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i>
+            Нова таблиця
+        </a>
     </div>
 
     {% if tables %}
         <div class="row g-3">
             {% for table in tables %}
-                <div class="col-md-4">
-                    <div class="card h-100" style="border-left: 5px solid {{ table.color }};">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ table.name }}</h5>
-                            {% if table.description %}
-                                <p class="card-text text-muted small">{{ table.description }}</p>
-                            {% endif %}
-                            <a href="{% url 'transaction_list' table_id=table.pk %}"
-                               class="btn btn-sm btn-outline-primary">
-                                Транзакції
-                            </a>
-                            <a href="{% url 'table_analytics' table_id=table.pk %}"
-                               class="btn btn-sm btn-outline-success">
-                                📊 Аналітика
-                            </a>
-                            <a href="{% url 'table_update' pk=table.pk %}" class="btn btn-sm btn-outline-secondary">
-                                Редагувати
-                            </a>
-                            <a href="{% url 'table_delete' pk=table.pk %}" class="btn btn-sm btn-outline-danger">
-                                Видалити
-                            </a>
+                <div class="col-md-4 col-sm-6">
+                    <div class="table-grid-card">
+                        <div class="table-grid-card-accent" style="background: {{ table.color }};"></div>
+                        <div class="table-grid-card-body">
+                            <div class="table-grid-card-name">{{ table.name }}</div>
+                            <div class="table-grid-card-desc">
+                                {% if table.description %}{{ table.description }}{% endif %}
+                            </div>
+                            <div class="table-grid-card-actions">
+                                <a href="{% url 'transaction_list' table_id=table.pk %}"
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-list-ul"></i>
+                                    Транзакції
+                                </a>
+                                <a href="{% url 'table_analytics' table_id=table.pk %}"
+                                   class="btn btn-sm btn-outline-success">
+                                    <i class="bi bi-bar-chart-line"></i>
+                                    Аналітика
+                                </a>
+                                <a href="{% url 'table_update' pk=table.pk %}"
+                                   class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'table_delete' pk=table.pk %}"
+                                   class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
             {% endfor %}
         </div>
     {% else %}
-        <div class="text-center py-5">
-            <p class="text-muted">У тебе ще немає таблиць. Створи першу!</p>
-            <a href="{% url 'table_create' %}" class="btn btn-primary">+ Створити таблицю</a>
+        <div class="card">
+            <div class="card-body">
+                <div class="empty-state">
+                    <span class="empty-state-icon">🗂️</span>
+                    <h5>Ще немає таблиць</h5>
+                    <p>Створи свою першу таблицю, щоб почати відстежувати витрати</p>
+                    <a href="{% url 'table_create' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-lg me-1"></i>
+                        Створити таблицю
+                    </a>
+                </div>
+            </div>
         </div>
     {% endif %}
+</div>
 {% endblock %}
